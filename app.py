@@ -18,7 +18,8 @@ def webhook():
     global pr_data
     if request.method == 'POST':
         pr_data = request.json
-        print(pr_data)  # Print the raw JSON payload to the console
+        print(pr_data['pull_request']['url'])
+        #print(pr_data)  # Print the raw JSON payload to the console
         return jsonify({'status': 'success'}), 200
     return jsonify({'status': 'failure'}), 400
 
