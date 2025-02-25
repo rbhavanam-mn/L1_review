@@ -1,37 +1,22 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Store the latest PR details
-latest_pr = {}
-
-@app.route("/webhook", methods=['POST'])
-def github_webhook():
-    global latest_pr
-    if request.method == 'POST':
-        payload = request.json
-        if 'pull_request' in payload:
-            pr = payload['pull_request']
-            latest_pr = {
-                'title': pr['title'],
-                'body': pr['body'],
-                'url': pr['html_url']
-            }
-        return jsonify({'status': 'success'}), 200
-
 @app.route("/", methods=['GET'])
 def home():
-    return render_template_string("""
-        <h1>L1_review - First Level Review of Pull Requests</h1>
-        {% if latest_pr %}
-            <h2>Latest Pull Request</h2>
-            <p><strong>Title:</strong> {{ latest_pr.title }}</p>
-            <p><strong>Body:</strong> {{ latest_pr.body }}</p>
-            <p><strong>URL:</strong> <a href="{{ latest_pr.url }}">{{ latest_pr.url }}</a></p>
-        {% else %}
-            <p>No pull request data available.</p>
-        {% endif %}
-    """, latest_pr=latest_pr)
+    return "<h1>for the l1 review</h1>"
+
+@app.route("/webhook", methods=['POST'])
+def webhook():
+    if request.method == 'POST':
+        data = request.json
+        if data and 'pull_request' in data:
+            pr_info = data['pull_request']
+            print(f"PR Title: {pr_info['title']}")
+            print(f"PR URL: {pr_info['html_url']}")
+            print(f"PR User: {pr_info['user']['login']}")
+        return jsonify({'status': 'success'}), 200
+    return jsonify({'status': 'failure'}), 400
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    app.run(host='0.0.0.0', port=5000)
