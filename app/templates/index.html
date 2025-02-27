@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PR Review Data</title>
+</head>
+<body>
+    <h1>Pull Request Data</h1>
+    {% if pr_data %}
+        <pre>{{ pr_data | tojson(indent=2) }}</pre>
+    {% else %}
+        <p>No PR data available</p>
+    {% endif %}
+</body>
+</html>
