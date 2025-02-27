@@ -7,7 +7,7 @@ from app import app
 def webhook():
     try:
         webhook_data = request.json
-        
+        print(webhook_data)
         # Extract required data
         pr_number = webhook_data['number']
         comments_url = webhook_data['pull_request']['_links']['comments']['href']
