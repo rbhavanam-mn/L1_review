@@ -11,4 +11,5 @@ def index():
 def webhook():
     global pr_data
     pr_data = request.json
+    print(pr_data)
     return jsonify({"status": "success"})
