@@ -20,7 +20,7 @@ def webhook():
         
         # Prepare comment
         comment_data = {
-            'body': 'need manager approval'
+            'body': 'pylint Error "Exceeds maximum line length of 120"'
         }
         
         # Post comment
