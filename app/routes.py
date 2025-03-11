@@ -7,6 +7,9 @@ from app import app
 def webhook():
     try:
         webhook_data = request.json
+        print('******************')
+        print(request)
+        print('******************')
         print(webhook_data)
         # Extract required data
         pr_number = webhook_data['number']
