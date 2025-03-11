@@ -13,7 +13,12 @@ def webhook():
         comments_url = webhook_data['pull_request']['_links']['comments']['href']
         repo_url = webhook_data['pull_request']['head']['repo']['clone_url']
         branch_name = webhook_data['pull_request']['head']['ref']
-
+        println('************************')
+        println('repo_url',repo_url)
+        println('pr_number',pr_number)
+        println('comments_url',comments_url)
+        println('branch_name',branch_name)
+        println('************************')
         # Create a temporary directory for cloning
         with tempfile.TemporaryDirectory() as temp_dir:
             # Clone the repository
@@ -42,11 +47,6 @@ def webhook():
                 'Accept': 'application/vnd.github.v3+json'
             }
 
-        # GitHub API configuration
-        headers = {
-            'Authorization': f'token {os.environ.get("GITHUB_TOKEN")}',
-            'Accept': 'application/vnd.github.v3+json'
-        }
         # Prepare comment with pylint results
         comment_data = {
             'body': f'Pylint Analysis Results:\n```\n{pylint_output or "No pylint errors found."}\n```'
