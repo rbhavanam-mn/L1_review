@@ -1,8 +1,13 @@
 from flask import request, jsonify
 import requests
+import tempfile
 import os
+from git.repo.base import Repo
 from app import app
+import subprocess
 
+#path in render /opt/render/project/src
+    
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
@@ -12,9 +17,42 @@ def webhook():
         # Extract required data
         pr_number = webhook_data['number']
         comments_url = webhook_data['pull_request']['_links']['comments']['href']
-        repo_url = webhook_data['pull_request']['html_url']
+        repo_url ='https://github.com/rbhavanam-mn/L1_review/'
         branch_name = webhook_data['pull_request']['head']['ref']
         
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Clone the repository
+            repo = Repo.clone_from(repo_url, temp_dir)
+            repo.git.checkout(branch_name)
+            
+            # Run pylint on the Python files
+            pylint_output = ''
+            for root, dirs, files in os.walk(temp_dir):
+                for file in files:
+                    if file.endswith('.py'):
+                        file_path = os.path.join(root, file)
+                        try:
+                            result = subprocess.run(
+                                ['python', '-m', 'pylint', file_path],  # Use python -m pylint instead
+                                capture_output=True,
+                                text=True
+                            )
+                            if result.stdout:
+                                pylint_output += f"File: {file}\n{result.stdout}\n\n"
+                        except Exception as e:
+                            pylint_output += f"Error analyzing {file}: {str(e)}\n"
+            # GitHub API configuration
+            headers = {
+                'Authorization': f'token {os.environ.get("GITHUB_TOKEN")}',
+                'Accept': 'application/vnd.github.v3+json'
+            }
+
+        # Prepare comment with pylint results
+        comment_data = {
+            'body': f'Pylint Analysis Results:\n```\n{pylint_output or "No pylint errors found."}\n```'
+        }
+            
+
         # GitHub API configuration
         headers = {
             'Authorization': f'token {os.environ.get("GITHUB_TOKEN")}',

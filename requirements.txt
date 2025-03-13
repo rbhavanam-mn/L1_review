@@ -8,3 +8,5 @@ MarkupSafe==2.1.5
 packaging==24.1
 Werkzeug==3.0.3
 requests==2.31.0
+GitPython==3.1.41
+pylint==3.0.3
