@@ -1,28 +1,19 @@
 from flask import request, jsonify
 import requests
-import tempfile
 import os
-from git.repo.base import Repo
 from app import app
-import subprocess
-
-#path in render /opt/render/project/src
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    # Get the event payload
-    payload = request.json
-    
-    # Get routes.py file path
-    routes_file = os.path.abspath(__file__)
-    
     try:
-        # Run pylint on routes.py
-        result = subprocess.run(
-            ['python', '-m', 'pylint', routes_file],
-            capture_output=True,
-            text=True
-        )
+        webhook_data = request.json
+        print('**********************')
+        print("Current Working Directory:", os.getcwd())
+        # Extract required data
+        pr_number = webhook_data['number']
+        comments_url = webhook_data['pull_request']['_links']['comments']['href']
+        repo_url = webhook_data['pull_request']['html_url']
+        branch_name = webhook_data['pull_request']['head']['ref']
         
         # GitHub API configuration
         headers = {
@@ -30,16 +21,32 @@ def webhook():
             'Accept': 'application/vnd.github.v3+json'
         }
         
-        # Prepare comment with pylint results
+        # Prepare comment
         comment_data = {
-            'body': f'Pylint Analysis Results for routes.py:\n```\n{result.stdout or "No pylint errors found."}\n```'
-        }
+             'body': f''' " Model-N AI is Running will let you know the results"    
+                PR Details:
+                - PR Number: #{pr_number}
+                - Comments URL: {comments_url}
+                - Repository URL: {repo_url}
+                - Branch Name: {branch_name}'''
+            }
         
-        # Post comment to GitHub
-        comments_url = payload['pull_request']['comments_url']
+        # Post comment
         response = requests.post(comments_url, headers=headers, json=comment_data)
         
-        return jsonify({'status': 'success', 'message': 'Pylint analysis completed'})
+        if response.status_code == 201:
+            return jsonify({
+                "status": "success",
+                "message": f"Comment added to PR #{pr_number}"
+            })
+        
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to add comment. Status: {response.status_code}"
+        }), 500
         
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({
+            "status": "error", 
+            "message": str(e)
+        }), 500
