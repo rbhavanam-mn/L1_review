@@ -11,6 +11,8 @@ def webhook():
         # Extract required data
         pr_number = webhook_data['number']
         comments_url = webhook_data['pull_request']['_links']['comments']['href']
+        repo_url = webhook_data['pull_request']['html_url']
+        branch_name = webhook_data['pull_request']['head']['ref']
         
         # GitHub API configuration
         headers = {
@@ -20,8 +22,13 @@ def webhook():
         
         # Prepare comment
         comment_data = {
-            'body': 'pylint Error "Exceeds maximum line length of 120"'
-        }
+             'body': f'''pylint Error "Exceeds maximum line length of 120"    
+                PR Details:
+                - PR Number: #{pr_number}
+                - Comments URL: {comments_url}
+                - Repository URL: {repo_url}
+                - Branch Name: {branch_name}'''
+            }
         
         # Post comment
         response = requests.post(comments_url, headers=headers, json=comment_data)
